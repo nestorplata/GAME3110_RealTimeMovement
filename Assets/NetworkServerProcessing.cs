@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Networking.Transport;
 using UnityEngine;
 
 static public class NetworkServerProcessing
@@ -13,33 +14,44 @@ static public class NetworkServerProcessing
         string[] csv = msg.Split(',');
         int signifier = int.Parse(csv[0]);
 
-        if (signifier == ClientToServerSignifiers.asd)
+        switch (signifier)
         {
+            case ClientToServerSignifiers.OnInputChange:
+                string[] Input = csv[1].Split('_');
+                gameLogic.OnRecievedInput(clientConnectionID, Input);
+                break;
+            case ClientToServerSignifiers.NewPlayerCrated:
+                string[] Porcentage = csv[1].Split('_');
+                gameLogic.OnNewPlayer(clientConnectionID, Porcentage);
+                break;
 
         }
-        // else if (signifier == ClientToServerSignifiers.asd)
-        // {
-
-        // }
-
-        //gameLogic.DoSomething();
     }
     static public void SendMessageToClient(string msg, int clientConnectionID, TransportPipeline pipeline)
     {
         networkServer.SendMessageToClient(msg, clientConnectionID, pipeline);
     }
 
+    static public List<int> GetAllIDs()
+    {
+        return networkServer.GetAllIDs();
+    }
+
     #endregion
+
 
     #region Connection Events
 
     static public void ConnectionEvent(int clientConnectionID)
     {
         Debug.Log("Client connection, ID == " + clientConnectionID);
+        gameLogic.OnConnectionEvent(clientConnectionID);
     }
     static public void DisconnectionEvent(int clientConnectionID)
     {
         Debug.Log("Client disconnection, ID == " + clientConnectionID);
+        gameLogic.OnDisconnectionEvent(clientConnectionID);
+
     }
 
     #endregion
@@ -65,14 +77,19 @@ static public class NetworkServerProcessing
 }
 
 #region Protocol Signifiers
+
 static public class ClientToServerSignifiers
 {
-    public const int asd = 1;
+    public const int OnInputChange = 1;
+    public const int NewPlayerCrated = 2;
+
 }
 
-static public class ServerToClientSignifiers
+static public class ClientToServerInputs
 {
-    public const int asd = 1;
+    public const int negative = -1;
+    public const int none = 0;
+    public const int positive = 1;
 }
 
 #endregion

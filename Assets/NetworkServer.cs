@@ -174,6 +174,16 @@ public class NetworkServer : MonoBehaviour
         buffer.Dispose();
     }
 
+    public List<int> GetAllIDs()
+    {
+        List<int> IDs = new List<int>();
+        foreach (var Nconnection in networkConnections)
+        {
+            IDs.Add(connectionToIDLookup[Nconnection]);
+        }
+        return IDs;
+    }
+
 }
 
 public enum TransportPipeline
@@ -182,3 +192,6 @@ public enum TransportPipeline
     ReliableAndInOrder,
     FireAndForget
 }
+
+
+
