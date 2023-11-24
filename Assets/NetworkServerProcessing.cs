@@ -7,9 +7,8 @@ static public class NetworkServerProcessing
 {
 
     #region Send and Receive Data Functions
-    static public void ReceivedMessageFromClient(string msg, int clientConnectionID, TransportPipeline pipeline)
+    static public void ReceivedMessageFromClient(string msg, int PlayerID, TransportPipeline pipeline)
     {
-        Debug.Log("Network msg received =  " + msg + ", from connection id = " + clientConnectionID + ", from pipeline = " + pipeline);
 
         string[] csv = msg.Split(',');
         int signifier = int.Parse(csv[0]);
@@ -18,11 +17,13 @@ static public class NetworkServerProcessing
         {
             case ClientToServerSignifiers.OnInputChange:
                 string[] Input = csv[1].Split('_');
-                gameLogic.OnRecievedInput(clientConnectionID, Input);
+                gameLogic.OnRecievedInput(PlayerID, Input);
                 break;
-            case ClientToServerSignifiers.NewPlayerCrated:
-                string[] Porcentage = csv[1].Split('_');
-                gameLogic.OnNewPlayer(clientConnectionID, Porcentage);
+            case ClientToServerSignifiers.SendingMainPlayer:
+                Debug.Log("Network msg received =  " + msg + ", from connection id = " + PlayerID + ", from pipeline = " + pipeline);
+                int SendToID = int.Parse(csv[1]);
+                string[] Porcentage = csv[2].Split('_');
+                gameLogic.OnRecivedCharactherId(SendToID, PlayerID, Porcentage);
                 break;
 
         }
@@ -81,7 +82,7 @@ static public class NetworkServerProcessing
 static public class ClientToServerSignifiers
 {
     public const int OnInputChange = 1;
-    public const int NewPlayerCrated = 2;
+    public const int SendingMainPlayer = 2;
 
 }
 

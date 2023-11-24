@@ -24,38 +24,33 @@ public class GameLogic : MonoBehaviour
         }
     }
 
-    public void OnRecievedInput(int IDRecieved, string[] input)
-    {
-        foreach(int IDtoSend in NetworkServerProcessing.GetAllIDs())
-        {
-            SendMessageToClient(ServerToClientSignifiers.OnPlayerMovement, IDRecieved + "," + input[0] + "_" + input[1], IDtoSend);
-        }
-    }
-
-    public void OnNewPlayer(int IDRecieved, string[] Porcentage)
-    {
-        foreach (int IDtoSend in NetworkServerProcessing.GetAllIDs())
-        {
-            if(IDRecieved!=IDtoSend)
-            {
-                SendMessageToClient(ServerToClientSignifiers.OnPlayerMovement, IDRecieved + "," + Porcentage[0] + "_" + Porcentage[1], IDtoSend);
-            }
-        }
-    }
-
     public void OnConnectionEvent(int IDRecieved)
     {
-        foreach (int IDtoSend in NetworkServerProcessing.GetAllIDs())
+
+        foreach (int SendToID in NetworkServerProcessing.GetAllIDs())
         {
-            SendMessageToClient(ServerToClientSignifiers.OnPlayerConnection, IDRecieved+"", IDtoSend);
+            SendMessageToClient(ServerToClientSignifiers.OnPlayerConnection, IDRecieved + "", SendToID);
+
+        }
+    }
+    public void OnRecievedInput(int PlayerID, string[] input)
+    {
+        foreach (int SendToID in NetworkServerProcessing.GetAllIDs())
+        {
+            SendMessageToClient(ServerToClientSignifiers.OnPlayerMovement, PlayerID + "," + input[0] + "_" + input[1], SendToID);
         }
     }
 
-    public void OnDisconnectionEvent(int IDRecieved)
+    public void OnRecivedCharactherId(int SendToID, int PlayerID, string[] porcentage)
     {
-        foreach (int IDtoSend in NetworkServerProcessing.GetAllIDs())
+        SendMessageToClient(ServerToClientSignifiers.CreateOldPlayer, PlayerID + "," + porcentage[0] + "_" + porcentage[1], SendToID);
+    }
+
+    public void OnDisconnectionEvent(int PlayerID)
+    {
+        foreach (int SendToID in NetworkServerProcessing.GetAllIDs())
         {
-            SendMessageToClient(ServerToClientSignifiers.OnPlayerDisconnection, IDRecieved + "", IDtoSend);
+            SendMessageToClient(ServerToClientSignifiers.OnPlayerDisconnection, PlayerID + "", SendToID);
         }
     }
 
@@ -73,7 +68,8 @@ static public class ServerToClientSignifiers
     public const int OnPlayerDisconnection = -1;
     public const int OnPlayerConnection = 0;
     public const int OnPlayerMovement = 1;
-    public const int SetAdditionalPlayers = 2;
+    public const int CreateOldPlayer = 2;
+
 
 
 
