@@ -16,8 +16,10 @@ static public class NetworkServerProcessing
         switch (signifier)
         {
             case ClientToServerSignifiers.OnInputChange:
-                string[] Input = csv[1].Split('_');
-                gameLogic.OnRecievedInput(PlayerID, Input);
+                string[] input = csv[1].Split('_');
+                Vector2 InputVector = new Vector2(float.Parse(input[0]), float.Parse(input[1]));
+                gameLogic.OnRecievedInput(PlayerID, InputVector);
+
                 break;
             case ClientToServerSignifiers.SendingMainPlayer:
                 Debug.Log("Network msg received =  " + msg + ", from connection id = " + PlayerID + ", from pipeline = " + pipeline);
@@ -33,7 +35,7 @@ static public class NetworkServerProcessing
         networkServer.SendMessageToClient(msg, clientConnectionID, pipeline);
     }
 
-    static public List<int> GetAllIDs()
+    static public List<int> GetAllConnectedIDs()
     {
         return networkServer.GetAllIDs();
     }
@@ -83,15 +85,14 @@ static public class ClientToServerSignifiers
 {
     public const int OnInputChange = 1;
     public const int SendingMainPlayer = 2;
-
 }
 
-static public class ClientToServerInputs
+static public class ServerToClientSignifiers
 {
-    public const int negative = -1;
-    public const int none = 0;
-    public const int positive = 1;
+    public const int OnPlayerDisconnection = -1;
+    public const int OnPlayerConnection = 0;
+    public const int OnPlayerMovement = 1;
+    public const int CreateOldPlayer = 2;
 }
-
 #endregion
 

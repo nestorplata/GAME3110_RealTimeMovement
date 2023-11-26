@@ -5,9 +5,15 @@ using UnityEngine;
 public class GameLogic : MonoBehaviour
 {
     int ballonID=1;
+
+    const float CharacterSpeed = 0.25f;
+    float DiagonalCharacterSpeed;
+
     void Start()
     {
         NetworkServerProcessing.SetGameLogic(this);
+        DiagonalCharacterSpeed = Mathf.Sqrt(CharacterSpeed * CharacterSpeed + CharacterSpeed * CharacterSpeed) / 2f;
+
     }
 
     void Update()
@@ -27,17 +33,29 @@ public class GameLogic : MonoBehaviour
     public void OnConnectionEvent(int IDRecieved)
     {
 
-        foreach (int SendToID in NetworkServerProcessing.GetAllIDs())
+        foreach (int SendToID in NetworkServerProcessing.GetAllConnectedIDs())
         {
             SendMessageToClient(ServerToClientSignifiers.OnPlayerConnection, IDRecieved + "", SendToID);
 
         }
     }
-    public void OnRecievedInput(int PlayerID, string[] input)
+    public void OnRecievedInput(int PlayerID, Vector2 InputVector)
     {
-        foreach (int SendToID in NetworkServerProcessing.GetAllIDs())
+        Vector2 PlayerVelocity = Vector2.zero;
+        if (Mathf.Abs(InputVector.x * InputVector.y)==1)
         {
-            SendMessageToClient(ServerToClientSignifiers.OnPlayerMovement, PlayerID + "," + input[0] + "_" + input[1], SendToID);
+            PlayerVelocity.x = DiagonalCharacterSpeed * InputVector.x;
+            PlayerVelocity.y = DiagonalCharacterSpeed * InputVector.y;
+        }
+        else
+        {
+            PlayerVelocity.x = CharacterSpeed * InputVector.x;
+            PlayerVelocity.y = CharacterSpeed * InputVector.y;
+        }
+
+        foreach (int SendToID in NetworkServerProcessing.GetAllConnectedIDs())
+        {
+            SendMessageToClient(ServerToClientSignifiers.OnPlayerMovement, PlayerID + "," + PlayerVelocity.x + "_" + PlayerVelocity.y, SendToID);
         }
     }
 
@@ -48,7 +66,7 @@ public class GameLogic : MonoBehaviour
 
     public void OnDisconnectionEvent(int PlayerID)
     {
-        foreach (int SendToID in NetworkServerProcessing.GetAllIDs())
+        foreach (int SendToID in NetworkServerProcessing.GetAllConnectedIDs())
         {
             SendMessageToClient(ServerToClientSignifiers.OnPlayerDisconnection, PlayerID + "", SendToID);
         }
@@ -61,18 +79,3 @@ public class GameLogic : MonoBehaviour
 
 }
 
-#region Protocol Signifiers
-
-static public class ServerToClientSignifiers
-{
-    public const int OnPlayerDisconnection = -1;
-    public const int OnPlayerConnection = 0;
-    public const int OnPlayerMovement = 1;
-    public const int CreateOldPlayer = 2;
-
-
-
-
-}
-
-#endregion
