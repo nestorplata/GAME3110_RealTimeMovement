@@ -9,6 +9,7 @@ static public class NetworkServerProcessing
     #region Send and Receive Data Functions
     static public void ReceivedMessageFromClient(string msg, int PlayerID, TransportPipeline pipeline)
     {
+        Debug.Log("Network msg received =  " + msg + ", from connection id = " + PlayerID + ", from pipeline = " + pipeline);
 
         string[] csv = msg.Split(',');
         int signifier = int.Parse(csv[0]);
@@ -16,16 +17,20 @@ static public class NetworkServerProcessing
         switch (signifier)
         {
             case ClientToServerSignifiers.OnInputChange:
-                string[] input = csv[1].Split('_');
+                string[] Pos = csv[1].Split('_');
+                string[] input = csv[2].Split('_');
+
                 Vector2 InputVector = new Vector2(float.Parse(input[0]), float.Parse(input[1]));
-                gameLogic.OnRecievedInput(PlayerID, InputVector);
+
+                gameLogic.OnRecievedInput(PlayerID, Pos, InputVector);
 
                 break;
             case ClientToServerSignifiers.SendingMainPlayer:
-                Debug.Log("Network msg received =  " + msg + ", from connection id = " + PlayerID + ", from pipeline = " + pipeline);
                 int SendToID = int.Parse(csv[1]);
-                string[] Porcentage = csv[2].Split('_');
-                gameLogic.OnRecivedCharactherId(SendToID, PlayerID, Porcentage);
+                string[] pos = csv[2].Split('_');
+                string[] velocity = csv[3].Split('_');
+
+                gameLogic.OnRecivedCharactherId(SendToID, PlayerID, pos, velocity);
                 break;
 
         }
@@ -35,10 +40,7 @@ static public class NetworkServerProcessing
         networkServer.SendMessageToClient(msg, clientConnectionID, pipeline);
     }
 
-    static public List<int> GetAllConnectedIDs()
-    {
-        return networkServer.GetAllIDs();
-    }
+
 
     #endregion
 
@@ -56,6 +58,8 @@ static public class NetworkServerProcessing
         gameLogic.OnDisconnectionEvent(clientConnectionID);
 
     }
+
+ 
 
     #endregion
 

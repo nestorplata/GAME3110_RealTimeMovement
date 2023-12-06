@@ -174,16 +174,10 @@ public class NetworkServer : MonoBehaviour
         buffer.Dispose();
     }
 
-    public List<int> GetAllIDs()
+    public List<int> GetPlayerIDs()
     {
-        List<int> IDs = new List<int>();
-        foreach (var Nconnection in networkConnections)
-        {
-            IDs.Add(connectionToIDLookup[Nconnection]);
-        }
-        return IDs;
+        return new List<int>(idToConnectionLookup.Keys);
     }
-
 }
 
 public enum TransportPipeline
